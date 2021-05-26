@@ -37,7 +37,7 @@ func countLines(f *os.File, counts map[string]int) {
 	for input.Scan() {
 		counts[input.Text()]++
 		if counts[input.Text()] > 1 {
-			fmt.Printf("%s\n", f.Name())
+			fmt.Printf("%s\n%s\n", f.Name(), input.Text())
 		}
 	}
 	// NOTE: ignoring potential errors from input.Err()
