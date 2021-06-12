@@ -18,18 +18,41 @@ import java.util.concurrent.TimeoutException;
  */
 public class MqConnect {
 
+    private static Connection instance;
+
+    /**
+     * 连接MQ
+     * @param i int
+     * @return
+     * @throws IOException
+     * @throws TimeoutException
+     * @throws NoSuchAlgorithmException
+     * @throws KeyManagementException
+     * @throws URISyntaxException
+     */
     public static Connection getConnection(int i) throws IOException, TimeoutException, NoSuchAlgorithmException, KeyManagementException, URISyntaxException {
-        switch (i) {
-            case 1:
-                return connection1();
-            case 2:
-                return connection2();
-            default:
+        if (instance == null) {
+            switch (i) {
+                case 1:
+                    instance = connection();
+                    break;
+                case 2:
+                    instance = connectionByUri();
+                    break;
+                default:
+                    break;
+            }
         }
-        return null;
+        return instance;
     }
 
-    public static Connection connection1() throws IOException, TimeoutException {
+    /**
+     * 常用connection
+     * @return
+     * @throws IOException
+     * @throws TimeoutException
+     */
+    public static Connection connection() throws IOException, TimeoutException {
         ConnectionFactory connectionFactory = new ConnectionFactory();
         connectionFactory.setHost(Config.hostName);
         connectionFactory.setPort(Config.port);
@@ -41,7 +64,16 @@ public class MqConnect {
         return connection;
     }
 
-    public static Connection connection2() throws IOException, TimeoutException, NoSuchAlgorithmException, KeyManagementException, URISyntaxException {
+    /**
+     * 通过uri的方式连接
+     * @return
+     * @throws IOException
+     * @throws TimeoutException
+     * @throws NoSuchAlgorithmException
+     * @throws KeyManagementException
+     * @throws URISyntaxException
+     */
+    public static Connection connectionByUri() throws IOException, TimeoutException, NoSuchAlgorithmException, KeyManagementException, URISyntaxException {
         ConnectionFactory connectionFactory = new ConnectionFactory();
         String uri = Config.protocol + "://" + Config.userName + ":" + Config.password + "@" + Config.hostName + ":" + Config.port + Config.virtualHost;
         System.out.println(uri);

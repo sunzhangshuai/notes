@@ -25,6 +25,7 @@ public class Producer {
         Connection connection = MqConnect.getConnection(1);
         assert connection != null;
         Channel channel = MqChannel.getChannel(connection);
+        channel.basicPublish();
         MqExchange.declare(channel, "direct");
         MqQueue.bind(channel);
     }
