@@ -37,7 +37,7 @@ public class Consumer {
                                        byte[] body)
                     throws IOException
             {
-                System.out.println(Arrays.toString(body));
+                System.out.println(new String(body));
                 channel.basicReject(envelope.getDeliveryTag(), false);
             }
         });

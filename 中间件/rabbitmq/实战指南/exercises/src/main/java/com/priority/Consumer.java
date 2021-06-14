@@ -1,7 +1,8 @@
-package com.delay;
+package com.priority;
 
 import com.common.CommonConsumer;
 import com.common.MqConnect;
+import com.priority.Producer;
 import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
@@ -11,7 +12,6 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
-import java.util.Arrays;
 import java.util.concurrent.TimeoutException;
 
 /**
@@ -33,14 +33,12 @@ public class Consumer {
         Channel channel = connection.createChannel();
 
         // 推模式开始消费
-        CommonConsumer consumer = new CommonConsumer(channel) {
+        channel.basicConsume(Producer.queueName, false, consumerTag, new CommonConsumer(channel) {
             @Override
             public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {
                 System.out.println(new String(body));
                 channel.basicAck(envelope.getDeliveryTag(), false);
             }
-        };
-
-        channel.basicConsume(Producer.delayQueueName, false, consumerTag, consumer);
+        });
     }
 }

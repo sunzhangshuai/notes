@@ -31,9 +31,9 @@ public class Producer {
 
     static String delayExchangeName = "exchange:study:delay";
 
-    static String delayQueueNamePre = "queue:study:delay:";
+    static String delayQueueName = "queue:study:delay:";
 
-    static String delayRoutingKeyPre = "key.study.delay.";
+    static String delayRoutingKey = "key.study.delay.";
 
     static List<Integer> times = new ArrayList<>();
 
@@ -57,16 +57,14 @@ public class Producer {
         // 2. 获取信道
         Channel channel = connection.createChannel();
 
-        // 3. 声明交换器、声明队列、绑定交换器和队列
+        // 3. 声明死信交换器、声明死信队列、绑定死信交换器和队列
         channel.exchangeDeclare(delayExchangeName, typeDirect, true);
+        channel.queueDeclare(delayQueueName, true, false, false, null);
+        channel.queueBind(delayQueueName, delayExchangeName, delayRoutingKey);
+
+        // 4. 声明交换器、声明队列、绑定交换器和队列
         channel.exchangeDeclare(originExchangeName, typeDirect, true);
         for (Integer time : times) {
-            // 声明死信队列、绑定交换器和队列
-            String delayQueueName = delayQueueNamePre + time + "s";
-            channel.queueDeclare(delayQueueName, true, false, false, null);
-            String delayRoutingKey = delayRoutingKeyPre + time + "s";
-            channel.queueBind(delayQueueName, delayExchangeName, delayRoutingKey);
-
             // 声明队列
             HashMap<String, Object> param = new HashMap<>(3);
             param.put("x-message-ttl", time * 1000);

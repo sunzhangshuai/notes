@@ -18,11 +18,11 @@ import java.util.concurrent.TimeoutException;
  * @date 2021/6/2 9:10 下午
  */
 public class Producer {
-    static String originExchangeName = "exchange:study:origin";
+    static String originExchangeName = "exchange:study:dx:origin";
 
-    static String originQueueName = "queue:study:origin";
+    static String originQueueName = "queue:study:dx:origin";
 
-    static String originRoutingKey = "key.study.origin";
+    static String originRoutingKey = "key.study.dx.origin";
 
     static String dxExchangeName = "exchange:study:dx";
 
@@ -43,7 +43,7 @@ public class Producer {
         // 3. 声明死信交换器、声明死信队列、绑定死信交换器和死信队列
         channel.exchangeDeclare(dxExchangeName, typeDirect, true);
         channel.queueDeclare(dxQueueName, true, false, false, null);
-        channel.queueBind(dxExchangeName, dxQueueName, dxRoutingKey);
+        channel.queueBind(dxQueueName, dxExchangeName, dxRoutingKey);
 
         // 4. 声明源交换器、声明源队列、绑定源交换器和源队列
         channel.exchangeDeclare(originExchangeName, typeDirect, true);
