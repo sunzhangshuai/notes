@@ -45,7 +45,7 @@ public class Producer {
         channel.queueDeclare(aeQueueName, true, false, false, null);
         channel.queueBind(aeQueueName, aeExchangeName, aeRoutingKey);
 
-        // 4. 声明源交换器
+        // 4. 声明源交换器，不声明队列
         Map<String, Object> param = new HashMap<>(1);
         param.put("alternate-exchange", aeExchangeName);
         channel.exchangeDeclare(originExchangeName, originTypeDirect, true, true, param);
@@ -58,7 +58,7 @@ public class Producer {
                     new AMQP.BasicProperties()
                             .builder()
                             .build(),
-                    "备份交换器".getBytes(StandardCharsets.UTF_8));
+                    "alternate-exchange msg".getBytes(StandardCharsets.UTF_8));
             maxNum--;
         }
     }
