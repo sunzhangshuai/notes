@@ -41,7 +41,7 @@ public class RpcServer {
                         .builder()
                         .correlationId(correlationId)
                         .build();
-                channel.basicPublish(RpcClient.exchangeName, replyTo, basicProperties, String.valueOf(sum).getBytes(StandardCharsets.UTF_8));
+                channel.basicPublish("", replyTo, basicProperties, String.valueOf(sum).getBytes(StandardCharsets.UTF_8));
                 channel.basicAck(envelope.getDeliveryTag(), false);
             }
         });

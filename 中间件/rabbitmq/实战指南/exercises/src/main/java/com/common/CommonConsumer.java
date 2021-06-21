@@ -60,9 +60,6 @@ public class CommonConsumer extends DefaultConsumer {
                                byte[] body)
             throws IOException
     {
-        System.out.println("handleDelivery consumerTag:" + consumerTag);
-        System.out.println("handleDelivery envelope:" + envelope);
-        System.out.println("handleDelivery properties:" + properties);
-        System.out.println("handleDelivery body:" + Arrays.toString(body));
+       System.out.println("handleDelivery body:" + new String(body));
     }
 }
