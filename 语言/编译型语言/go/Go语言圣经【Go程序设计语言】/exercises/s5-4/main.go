@@ -1,4 +1,4 @@
-// 修改findlinks代码中遍历n.FirstChild链表的部分，将循环调用visit，改成递归调用。
+// 扩展visit函数，使其能够处理其他类型的结点，如images、scripts和style sheets。
 package main
 
 import (
@@ -24,14 +24,14 @@ func main() {
 
 // visit appends to links each link found in n and returns the result.
 func visit(n *html.Node) {
-	if n.Type == html.ElementNode && n.Data == "a" {
+	if n.Type == html.ElementNode && (n.Data == "a" || n.Data == "img" || n.Data == "link" || n.Data == "script") {
 		for _, a := range n.Attr {
-			if a.Key == "href" {
+			if a.Key == "href" || a.Key == "src" {
 				fmt.Println(a.Val)
 			}
 		}
 	}
 	for c := n.FirstChild; c != nil; c = c.NextSibling {
-		 visit(c)
+		visit(c)
 	}
 }

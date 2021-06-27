@@ -1,4 +1,4 @@
-// 修改findlinks代码中遍历n.FirstChild链表的部分，将循环调用visit，改成递归调用。
+// 编写函数输出所有text结点的内容。注意不要访问<script>和<style>元素，因为这些元素对浏览者是不可见的。
 package main
 
 import (
@@ -24,14 +24,13 @@ func main() {
 
 // visit appends to links each link found in n and returns the result.
 func visit(n *html.Node) {
-	if n.Type == html.ElementNode && n.Data == "a" {
-		for _, a := range n.Attr {
-			if a.Key == "href" {
-				fmt.Println(a.Val)
-			}
-		}
+	if n.Type == html.TextNode && n.Data != "script" && n.Data != "style" {
+		fmt.Println(n.Data)
 	}
 	for c := n.FirstChild; c != nil; c = c.NextSibling {
-		 visit(c)
+		if n.Data == "script" || n.Data == "style" {
+			continue
+		}
+		visit(c)
 	}
 }

@@ -1,4 +1,4 @@
-// 修改findlinks代码中遍历n.FirstChild链表的部分，将循环调用visit，改成递归调用。
+// 编写函数，记录在HTML树中出现的同名元素的次数。
 package main
 
 import (
@@ -8,6 +8,8 @@ import (
 	"path/filepath"
 	"runtime"
 )
+
+var res map[string]int
 
 func main() {
 	_, fullFilename, _, _ := runtime.Caller(0)
@@ -19,19 +21,20 @@ func main() {
 		_, _ = fmt.Fprintf(os.Stderr, "findlinks1: %v\n", err)
 		os.Exit(1)
 	}
+	res = make(map[string]int)
 	visit(doc)
+	fmt.Println(res)
 }
 
 // visit appends to links each link found in n and returns the result.
 func visit(n *html.Node) {
-	if n.Type == html.ElementNode && n.Data == "a" {
-		for _, a := range n.Attr {
-			if a.Key == "href" {
-				fmt.Println(a.Val)
-			}
+	if n.Type == html.ElementNode {
+		if _, ok := res[n.Data]; !ok {
+			res[n.Data] = 0
 		}
+		res[n.Data]++
 	}
 	for c := n.FirstChild; c != nil; c = c.NextSibling {
-		 visit(c)
+		visit(c)
 	}
 }
