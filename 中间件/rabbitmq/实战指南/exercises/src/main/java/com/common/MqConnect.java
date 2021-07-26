@@ -25,7 +25,7 @@ public class MqConnect {
     /**
      * 域名
      */
-    static String hostName = "127.0.0.1";
+    static String hostName = "localhost";
 
     /**
      * 端口

@@ -2,6 +2,8 @@ package com.dxq;
 
 import com.common.MqConnect;
 import com.rabbitmq.client.AMQP;
+import com.rabbitmq.client.AMQP.BasicProperties;
+import com.rabbitmq.client.BuiltinExchangeType;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 
@@ -30,42 +32,52 @@ public class Producer {
 
     static String dxRoutingKey = "key.study.dx";
 
-    static String typeDirect = "direct";
-
     public static void main(String[] args) throws IOException, TimeoutException, InterruptedException {
-        // 1. 获取连接
         Connection connection = MqConnect.connection();
-        assert connection != null;
-
-        // 2. 获取信道
         Channel channel = connection.createChannel();
 
-        // 3. 声明死信交换器、声明死信队列、绑定死信交换器和死信队列
-        channel.exchangeDeclare(dxExchangeName, typeDirect, true);
-        channel.queueDeclare(dxQueueName, true, false, false, null);
+        // 声明死信
+        channel.exchangeDeclare(dxExchangeName, BuiltinExchangeType.DIRECT, true, true, null);
+        channel.queueDeclare(dxQueueName, true, false, true, null);
         channel.queueBind(dxQueueName, dxExchangeName, dxRoutingKey);
 
-        // 4. 声明源交换器、声明源队列、绑定源交换器和源队列
-        channel.exchangeDeclare(originExchangeName, typeDirect, true);
-        Map<String, Object> param = new HashMap<>(2);
-        param.put("x-dead-letter-exchange", dxExchangeName);
-        param.put("x-dead-letter-routing-key", dxRoutingKey);
-        channel.queueDeclare(originQueueName, true, false, false, param);
+        // 声明源
+        channel.exchangeDeclare(originExchangeName, BuiltinExchangeType.DIRECT, true, true, null);
+        Map<String, Object> params = new HashMap<>();
+        params.put("x-dead-letter-exchange", dxExchangeName);
+        params.put("x-dead-letter-routing-key", dxRoutingKey);
+        params.put("x-max-length", 10);
+        channel.queueDeclare(originQueueName, true, false, true, params);
         channel.queueBind(originQueueName, originExchangeName, originRoutingKey);
 
-        // 5. 发送消息
-        int maxNum = 100;
-        while (maxNum > 0) {
-            Thread.sleep(5000);
-            channel.basicPublish(originExchangeName,
+        // 1. 消息过期
+        channel.basicPublish(
+                originExchangeName,
+                originRoutingKey,
+                new BasicProperties()
+                        .builder()
+                        .expiration("1000")
+                        .build(),
+                "消息过期".getBytes(StandardCharsets.UTF_8));
+
+        // 2. 被拒绝
+        channel.basicPublish(
+                originExchangeName,
+                originRoutingKey,
+                new BasicProperties()
+                        .builder()
+                        .build(),
+                "被拒绝".getBytes(StandardCharsets.UTF_8));
+
+        // 3. 队列超长
+        for (int i = 0; i < 20; i++) {
+            channel.basicPublish(
+                    originExchangeName,
                     originRoutingKey,
-                    new AMQP.BasicProperties()
+                    new BasicProperties()
                             .builder()
-                            .contentType("application/json")
-                            .messageId("12222")
                             .build(),
-                    "123".getBytes(StandardCharsets.UTF_8));
-            maxNum--;
+                    ("队列超长"+i).getBytes(StandardCharsets.UTF_8));
         }
     }
 }

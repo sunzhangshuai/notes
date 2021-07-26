@@ -1,7 +1,8 @@
 package com.delay;
 
 import com.common.MqConnect;
-import com.rabbitmq.client.AMQP;
+import com.rabbitmq.client.AMQP.BasicProperties;
+import com.rabbitmq.client.BuiltinExchangeType;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 
@@ -13,7 +14,6 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Random;
 import java.util.concurrent.TimeoutException;
 
 /**
@@ -31,13 +31,11 @@ public class Producer {
 
     static String delayExchangeName = "exchange:study:delay";
 
-    static String delayQueueName = "queue:study:delay:";
+    static String delayQueueName = "queue:study:delay";
 
-    static String delayRoutingKey = "key.study.delay.";
+    static String delayRoutingKey = "key.study.delay";
 
     static List<Integer> times = new ArrayList<>();
-
-    static List<Channel> channels = new ArrayList<>();
 
     static {
         times.add(5);
@@ -47,47 +45,36 @@ public class Producer {
         times.add(60);
     }
 
-    static String typeDirect = "direct";
-
     public static void main(String[] args) throws IOException, TimeoutException, NoSuchAlgorithmException, KeyManagementException, URISyntaxException {
-        // 1. 获取连接
         Connection connection = MqConnect.connection();
-        assert connection != null;
-
-        // 2. 获取信道
         Channel channel = connection.createChannel();
 
-        // 3. 声明死信交换器、声明死信队列、绑定死信交换器和队列
-        channel.exchangeDeclare(delayExchangeName, typeDirect, true);
-        channel.queueDeclare(delayQueueName, true, false, false, null);
+        // 声明死信
+        channel.exchangeDeclare(delayExchangeName, BuiltinExchangeType.DIRECT, true, true, null);
+        channel.queueDeclare(delayQueueName, true, false, true, null);
         channel.queueBind(delayQueueName, delayExchangeName, delayRoutingKey);
 
-        // 4. 声明交换器、声明队列、绑定交换器和队列
-        channel.exchangeDeclare(originExchangeName, typeDirect, true);
-        for (Integer time : times) {
-            // 声明队列
-            HashMap<String, Object> param = new HashMap<>(3);
-            param.put("x-message-ttl", time * 1000);
-            param.put("x-dead-letter-exchange", delayExchangeName);
-            param.put("x-dead-letter-routing-key", delayRoutingKey);
-            String queueName = originQueueNamePre + time + "s";
-            channel.queueDeclare(queueName, true, false, false, param);
-            // 绑定交换器和队列
-            String routingKey = originRoutingKeyPre + time + "s";
-            channel.queueBind(queueName, originExchangeName, routingKey);
+        // 声明源
+        channel.exchangeDeclare(originExchangeName, BuiltinExchangeType.DIRECT, true, true, null);
+        for (Integer integer : times) {
+            HashMap<String, Object> params = new HashMap<>();
+            params.put("x-dead-letter-exchange", delayExchangeName);
+            params.put("x-dead-letter-routing-key", delayRoutingKey);
+            String originQueueName = originQueueNamePre + integer;
+            channel.queueDeclare(originQueueName, true, false, true, params);
+            channel.queueBind(originQueueName, originExchangeName, originRoutingKeyPre + integer);
         }
 
-        // 4. 发送消息
-        int maxNum = 100;
-        while (maxNum > 0) {
-            int i = new Random().nextInt(5);
-            String routingKey = originRoutingKeyPre + times.get(i) + "s";
-            String msg = "this is " + times.get(i) + "s msg";
-            channel.basicPublish(originExchangeName,
-                    routingKey,
-                    null,
-                    msg.getBytes(StandardCharsets.UTF_8));
-            maxNum--;
+        for (Integer integer : times) {
+            int time = integer * 1000;
+            channel.basicPublish(
+                    originExchangeName,
+                    originRoutingKeyPre + integer,
+                    new BasicProperties().builder()
+                            .expiration(String.valueOf(time))
+                            .build(),
+                    (time + "毫秒后过期").getBytes(StandardCharsets.UTF_8)
+            );
         }
     }
 }

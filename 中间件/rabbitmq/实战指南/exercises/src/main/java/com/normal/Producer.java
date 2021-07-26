@@ -2,6 +2,9 @@ package com.normal;
 
 import com.common.MqConnect;
 import com.rabbitmq.client.AMQP;
+import com.rabbitmq.client.AMQP.BasicProperties;
+import com.rabbitmq.client.AMQP.Exchange.DeclareOk;
+import com.rabbitmq.client.BuiltinExchangeType;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 
@@ -25,31 +28,28 @@ public class Producer {
 
     static String routingKey = "key.study.normal";
 
-    static String typeDirect = "direct";
-
     public static void main(String[] args) throws IOException, TimeoutException, NoSuchAlgorithmException, KeyManagementException, URISyntaxException {
-        // 1. 获取连接
         Connection connection = MqConnect.connection();
-        assert connection != null;
-
-        // 2. 获取信道
         Channel channel = connection.createChannel();
 
-        // 3. 声明交换器、声明队列、绑定交换器和队列
-        channel.exchangeDeclare(exchangeName, typeDirect, true);
-        channel.queueDeclare(queueName, true, false, false, null);
+        // 声明交换器
+        channel.exchangeDeclare(exchangeName, BuiltinExchangeType.DIRECT, true, true, null);
+
+        // 声明队列
+        channel.queueDeclare(queueName, true, false, true, null);
+
+        // 交换器绑定队列
         channel.queueBind(queueName, exchangeName, routingKey);
 
-        channel.basicPublish(exchangeName,
-                routingKey,
-                new AMQP.BasicProperties()
-                        .builder()
-                        .contentType("application/json")
-                        .expiration("6000")
-                        .build(),
-                "222".getBytes(StandardCharsets.UTF_8));
-
-        channel.addReturnListener((replyCode, replyText, exchange, routingKey, properties, body)
-                -> System.out.println("Basic.return 返回的消息是:" + new String(body)));
+        // 发消息
+        for (int i = 0; i < 100000; i++) {
+            channel.basicPublish(exchangeName,
+                    routingKey,
+                    new BasicProperties()
+                            .builder()
+                            .deliveryMode(2)
+                            .build(),
+                    "laopo,i love you".getBytes(StandardCharsets.UTF_8));
+        }
     }
 }

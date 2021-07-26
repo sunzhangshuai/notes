@@ -1,4 +1,4 @@
-package com.delay;
+package com.normal;
 
 import com.common.CommonConsumer;
 import com.common.MqConnect;
@@ -13,7 +13,6 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
-import java.util.Arrays;
 import java.util.concurrent.TimeoutException;
 
 /**
@@ -22,18 +21,21 @@ import java.util.concurrent.TimeoutException;
  * @author sunchen
  * @date 2021/6/2 9:10 下午
  */
-public class Consumer {
-    static String consumerTag = "consumer:study:delay:normal";
+public class ConsumerBak {
+    static String consumerTag = "consumer:study:normal2";
+
 
     public static void main(String[] args) throws IOException, TimeoutException, NoSuchAlgorithmException, KeyManagementException, URISyntaxException {
         Connection connection = MqConnect.connection();
-        Channel channel = connection.createChannel();
 
-        channel.basicConsume(Producer.delayQueueName, false, consumerTag, new DefaultConsumer(channel) {
+        Channel channel = connection.createChannel();
+        channel.basicConsume(Producer.queueName, false, consumerTag, new DefaultConsumer(channel){
+            //
             @Override
             public void handleDelivery(String consumerTag, Envelope envelope, BasicProperties properties, byte[] body) throws IOException {
+                //channel1.basicRecover(true);
                 channel.basicAck(envelope.getDeliveryTag(), true);
-                System.out.println(new String(body));
+                System.out.println("信道2：" + envelope.getDeliveryTag() + "通过");
             }
         });
     }
