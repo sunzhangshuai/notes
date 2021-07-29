@@ -80,3 +80,22 @@ rabbitmqctl start_app
 3. 解压新版本的rabbitmq到指定的目录。
 4. 指定新版本的mnesia路径为步骤2中保存的mnesia数据路径。
 5. 启动新版本的服务，注意先启动原版本中最后关闭的节点。
+
+### 单机多节点
+
+```shell
+# 启动
+RABBITMQ_NODE_PORT=5672 RABBITMQ_NODENAME=rabbit1 RABBITMQ_SERVER_START_ARGS="-rabbitmq_management listener [{port,15672}]" rabbitmq-server -detached
+RABBITMQ_NODE_PORT=5673 RABBITMQ_NODENAME=rabbit2 RABBITMQ_SERVER_START_ARGS="-rabbitmq_management listener [{port,15673}]" rabbitmq-server -detached
+RABBITMQ_NODE_PORT=5674 RABBITMQ_NODENAME=rabbit3 RABBITMQ_SERVER_START_ARGS="-rabbitmq_management listener [{port,15674}]" rabbitmq-server -detached
+
+# 加入集群
+rabbitmqctl -n rabbit2@zhangshuai24deMacBook-Pro stop_app
+rabbitmqctl -n rabbit2@zhangshuai24deMacBook-Pro reset
+rabbitmqctl -n rabbit2@zhangshuai24deMacBook-Pro join_cluster rabbit1@zhangshuai24deMacBook-Pro
+rabbitmqctl -n rabbit2@zhangshuai24deMacBook-Pro start_app
+rabbitmqctl -n rabbit3@zhangshuai24deMacBook-Pro stop_app
+rabbitmqctl -n rabbit3@zhangshuai24deMacBook-Pro reset
+rabbitmqctl -n rabbit3@zhangshuai24deMacBook-Pro join_cluster rabbit1@zhangshuai24deMacBook-Pro
+rabbitmqctl -n rabbit3@zhangshuai24deMacBook-Pro start_app
+```
