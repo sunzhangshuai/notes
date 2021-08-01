@@ -24,7 +24,6 @@ import java.util.concurrent.TimeoutException;
  * @date 2021/7/31 11:05 下午
  */
 public class TransferWithChannel extends Transfer {
-
     /**
      * 信道map key:vhostName value:信道
      */
@@ -73,7 +72,13 @@ public class TransferWithChannel extends Transfer {
         for (Object obj : queueList) {
             Queue queue = JSON.parseObject(JSON.toJSONString(obj), Queue.class);
             Channel channel = getChannel(queue.getVhost());
-            channel.queueDeclare(queue.getName(), queue.getDurable(), false, queue.getAuto_delete(), queue.getArguments());
+            channel.queueDeclare(
+                    queue.getName(),
+                    queue.getDurable(),
+                    false,
+                    queue.getAuto_delete(),
+                    queue.getArguments()
+            );
         }
     }
 
@@ -84,7 +89,14 @@ public class TransferWithChannel extends Transfer {
         for (Object obj : exchangeList) {
             Exchange exchange = JSON.parseObject(JSON.toJSONString(obj), Exchange.class);
             Channel channel = getChannel(exchange.getVhost());
-            channel.exchangeDeclare(exchange.getName(), exchange.getType(), exchange.getDurable(), exchange.getAuto_delete(), exchange.getInternal(), exchange.getArguments());
+            channel.exchangeDeclare(
+                    exchange.getName(),
+                    exchange.getType(),
+                    exchange.getDurable(),
+                    exchange.getAuto_delete(),
+                    exchange.getInternal(),
+                    exchange.getArguments()
+            );
         }
     }
 
@@ -95,7 +107,12 @@ public class TransferWithChannel extends Transfer {
         for (Object obj : bindingList) {
             Binding binding = JSON.parseObject(JSON.toJSONString(obj), Binding.class);
             Channel channel = getChannel(binding.getVhost());
-            channel.queueBind(binding.getDestination(), binding.getSource(), binding.getRouting_key(), binding.getArguments());
+            channel.queueBind(
+                    binding.getDestination(),
+                    binding.getSource(),
+                    binding.getRouting_key(),
+                    binding.getArguments()
+            );
         }
     }
 
@@ -118,7 +135,11 @@ public class TransferWithChannel extends Transfer {
         for (Object obj : bindingList) {
             Binding binding = JSON.parseObject(JSON.toJSONString(obj), Binding.class);
             Channel channel = getChannel(binding.getVhost());
-            channel.queueUnbind(binding.getDestination(), binding.getSource(), binding.getRouting_key());
+            channel.queueUnbind(
+                    binding.getDestination(),
+                    binding.getSource(),
+                    binding.getRouting_key()
+            );
         }
     }
 
