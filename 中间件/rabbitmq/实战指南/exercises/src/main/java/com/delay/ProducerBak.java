@@ -12,22 +12,23 @@ import java.nio.charset.StandardCharsets;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.TimeoutException;
 
 /**
- * Producer:
+ * ProducerBak: 反例，无法实现延时效果
  *
  * @author sunchen
  * @date 2021/6/2 9:10 下午
  */
-public class Producer {
+public class ProducerBak {
     static String originExchangeName = "exchange:study:delay:origin";
 
-    static String originQueueNamePre = "queue:study:delay:origin:";
+    static String originQueueName = "queue:study:delay:origin";
 
-    static String originRoutingKeyPre = "key.study.delay.origin.";
+    static String originRoutingKey = "key.study.delay.origin";
 
     static String delayExchangeName = "exchange:study:delay";
 
@@ -56,23 +57,22 @@ public class Producer {
 
         // 声明源
         channel.exchangeDeclare(originExchangeName, BuiltinExchangeType.DIRECT, true, true, null);
-        for (Integer integer : times) {
-            HashMap<String, Object> params = new HashMap<>();
-            params.put("x-dead-letter-exchange", delayExchangeName);
-            params.put("x-dead-letter-routing-key", delayRoutingKey);
-            params.put("x-message-ttl", integer * 1000);
-            String originQueueName = originQueueNamePre + integer;
-            channel.queueDeclare(originQueueName, true, false, true, params);
-            channel.queueBind(originQueueName, originExchangeName, originRoutingKeyPre + integer);
-        }
+        HashMap<String, Object> params = new HashMap<>(2);
+        params.put("x-dead-letter-exchange", delayExchangeName);
+        params.put("x-dead-letter-routing-key", delayRoutingKey);
+        channel.queueDeclare(originQueueName, true, false, true, params);
+        channel.queueBind(originQueueName, originExchangeName, originRoutingKey);
 
-        for (Integer integer : times) {
+        for (int i = 0; i < 100; i++) {
+            Collections.shuffle(times);
+            int strTime = times.get(0);
             channel.basicPublish(
                     originExchangeName,
-                    originRoutingKeyPre + integer,
+                    originRoutingKey,
                     new BasicProperties().builder()
+                            .expiration(String.valueOf(strTime * 1000))
                             .build(),
-                    (integer + "秒后过期").getBytes(StandardCharsets.UTF_8)
+                    ("第" + i + "条：" + strTime + "秒后过期").getBytes(StandardCharsets.UTF_8)
             );
         }
     }
