@@ -168,7 +168,7 @@ git clone <url> [projectName]
   - 未修改「**unmodified**」
   - 已修改「**modified**」
   - 已暂存「**staged**」
-- 未跟踪「**untracked**」：除已跟踪文件外的其它所有文件都属于未跟踪文件，它们既不存在于上次快照的记录中，也没有被放 入暂存区。 
+- 未跟踪「**untracked**」：除已跟踪文件外的其它所有文件都属于未跟踪文件，它们既不存在于上次快照的记录中，也没有被放入暂存区。 
 
 ![文件状态周期变化](imgs/文件状态周期变化.png)
 
@@ -212,7 +212,7 @@ git status --short
 
 ```shell
 # 创建.gitignore文件
-# 子目录下也可以有额外的 **.gitignore** 文件。子目录中的 **.gitignore** 文件中的规则只作用于它所在的目录中。
+# 子目录下也可以有额外的 .gitignore 文件。子目录中的 .gitignore 文件中的规则只作用于它所在的目录中。
 ```
 
 #### 格式规范 
@@ -224,24 +224,43 @@ git status --short
   - **?**：只匹配任意一个字符。
   - **[0-9]** ：表示所有在这两个字符范围内的都可以匹配。
   - ******：匹配任意中间目录。
-- 以 */* 开头：防止递归。
+- 以 */* 开头：防止递归。指定文件
 - 以 */* 结尾：指定目录。
 - 模式前加叹号 *!* ：忽略指定模式以外的文件或目录。
 
-### 查看已暂存的修改
+### 查看未暂存的修改
 
 ```shell
 git diff
 ```
 
-### 查看未暂存的修改
+- 对比未暂存和已暂存。
+
+### 查看已暂存的修改
 
 ```shell
 git diff --cached
 ```
 
-1. 可以使用 `git difftool` 命令来调用 emerge 或 vimdiff 等软件（包括商业软件）输出 diff 的分析结果。 
-2. `git difftool --tool-help` ：看系统支持哪些 Git Diff 插件。
+- 可以使用 `git difftool` 命令来调用 emerge 或 vimdiff 等软件（包括商业软件）输出 diff 的分析结果。 
+
+- `git difftool --tool-help` ：看系统支持哪些 Git Diff 插件。
+
+- cached 和 staged 是同义词。
+- 对比已暂存和未修改。
+
+### 查看任意两个版本之间的修改
+
+```shell
+git diff <版本号1> <版本号2>
+```
+
+### 查看某文件夹下的修改
+
+```shell
+git diff <文件夹>
+git diff <版本号1> <版本号2> <文件夹>
+```
 
 ### 提交更新
 
@@ -259,11 +278,11 @@ git commit -m "msg"
 
 #### 显示格式
 
-[提交分支 提交的完整 SHA-1 校验和] 提交信息
+[提交分支 提交的 SHA-1 校验和前缀] 提交信息
 
 多少文件修改，多少行添加，多少行删除。
 
-创建了哪些文件，修改了哪些文件。
+创建了哪些文件。删除了哪些文件。
 
 ### 跳过使用暂存区域
 
@@ -315,3 +334,255 @@ git add fileTo
 ```
 
 ## 查看提交历史
+
+```shell
+git log
+```
+
+- 会按时间先后顺序列出所有的提交，最近的更新排在最上面。
+- 会列出每个提交的 SHA-1 校验和、作者的名字和电子邮件地址、提交时间以及提交说明。
+
+### 显示每次提交引入的差异
+
+```shell
+git log -p|--patch
+```
+
+### 显示每次提交的简略统计
+
+```shell
+git log --stat
+```
+
+- 列出所有被修改过的文件、有多少文件修改、被修改过的文件删了多少行，加了多少行。 
+
+- 在每次提交的最后还有一个总结。 
+
+### 指定格式展示提交历史
+
+```shell
+git log --pretty=[oneline|short|full|fuller]
+```
+
+- **oneline**：每个提交放在一行显示。
+- **short**：不显示date。
+- **full**和**fuller**：多显示一些内容。
+
+```shell
+git log --pretty=format:"%h - %an, %ar : %s"
+```
+
+| 选项 | 说明                                          |
+| :--- | :-------------------------------------------- |
+| %H   | 提交的完整hash值                              |
+| %h   | 提交的简写哈希值                              |
+| %T   | 树的完整哈希值                                |
+| %t   | 树的简写哈希值                                |
+| %P   | 父提交的完整哈希值                            |
+| %p   | 父提交的简写哈希值                            |
+| %an  | 作者名字                                      |
+| %ae  | 作者的电子邮箱                                |
+| %ad  | 作者修订日期（可以用 --date=选项 来定制格式） |
+| %ar  | 作者修订日期，按多久以前的方式显示            |
+| %cn  | 提交者的名字                                  |
+| %ce  | 提交者的电子邮件地址                          |
+| %cd  | 提交日期                                      |
+| %cr  | 提交日期（距今多长时间）                      |
+| %s   | 提交说明                                      |
+
+### 展示分支、合并历史
+
+```shell
+git log --graph
+```
+
+### 限制输出长度
+
+```shell
+git log -<n>
+```
+
+| 选项              | 说明                                       |
+| ----------------- | ------------------------------------------ |
+| -\<n>             | 仅显示最近的 n 条提交。                    |
+| --since， --after | 仅显示指定时间之后的提交。                 |
+| --until，--before | 仅显示指定时间之前的提交。                 |
+| --author          | 仅显示作者匹配指定字符串的提交。           |
+| --committer       | 仅显示提交者匹配指定字符串的提交。         |
+| --grep            | 仅显示提交说明中包含指定字符串的提交。     |
+| -S                | 仅显示添加或删除内容匹配指定字符串的提交。 |
+
+## 撤销操作
+
+### 修改最后一次提交
+
+```shell
+git commit --amend
+```
+
+### 取消暂存的文件
+
+```shell
+git reset HEAD <file>...
+```
+
+### 撤消对文件的修改
+
+```shell
+git checkout -- <file>...
+```
+
+对那个文件在本地的任何修改都会消失——Git 会用最近提交的版本覆盖掉它。
+
+## 远程仓库
+
+### 查看远程仓库
+
+```shell
+git remote
+```
+
+- 会列出你指定的每一个远程服务器的简写。
+- origin 是 Git 给你克隆的仓库服务器的默认名字。
+
+```shell
+git remote -v
+```
+
+显示需要读写远程仓库使用的 Git 保存的简写与其对应的 URL。
+
+### 添加远程仓库
+
+```shell
+ git remote add <shortname> <url>
+```
+
+### 从远程仓库中抓取与拉取
+
+```shell
+git fetch <remote>
+```
+
+*git fetch* 命令只会将数据下载到你的本地仓库。并不会自动合并或修改你当前的工作。
+
+### 推送到远程仓库
+
+```shell
+git push <remote> <branch>
+```
+
+### 查看某个远程仓库
+
+```shell
+git remote show <remote>
+```
+
+- 列出了当你在特定的分支上执行 git push 会自动地推送到哪一个远程分支。
+- 列出了哪些远程分支不在你的本地，哪些远程分支已经从服务器上移除了。
+- 当你执行 git pull 时哪些本地分支可以与它跟踪的远程分支自动合并。
+
+### 重命名远程仓库
+
+```shell
+git remote rename oldName newName
+```
+
+### 移除远程仓库
+
+```shell
+git remote remove name
+```
+
+## 打标签
+
+Git 可以给仓库历史中的某一个提交打上标签，以示重要。
+
+### 列出标签
+
+```shell
+git tag
+```
+
+以字母顺序列出标签，但是它们显示的顺序并不重要。
+
+```shell
+# 通配符 e.g. "v1.8.5*"
+git tag -l <通配符>
+```
+
+按照通配符列出标签需要 -l 或 --list 选项。
+
+### 创建标签
+
+Git 支持两种标签：轻量标签（**lightweight**）与附注标签（**annotated**）。
+
+#### 附注标签
+
+```shell
+git tag -a <标签名> -m "备注"
+```
+
+- 存储在 Git 数据库中的一个完整对象， 它们是可以被校验的，其中包含打标签者的名字、电子邮件地址、日期时间， 此外还有一个标签信息，并且可以使用 GNU Privacy Guard （GPG）签名并验证。 
+- 通常会建议创建附注标签，这样你可以拥有以上所有信息。
+
+#### 轻量标签
+
+```shell
+git tag <标签名>
+```
+
+很像一个不会改变的分支——它只是某个特定提交的引用。
+
+#### 对过去的提交打标签
+
+```shell
+git tag -a <标签名> <logid>
+```
+
+### 查看标签信息和与之对应的提交信息
+
+```shell
+git show <标签名>
+```
+
+轻量标签无法额外的标签信息。
+
+### 共享标签
+
+```shell
+git push <remote> <tagname>
+# 并不会区分轻量标签和附注标签， 没有简单的选项能够让你只选择推送一种标签。
+git push <remote> --tags
+```
+
+### 删除标签
+
+#### 删除本地仓库上的标签
+
+```shell
+git tag -d <tagname>
+```
+
+#### 删除远程仓库上的标签
+
+```shell
+# 将冒号前面的空值推送到远程标签名，从而高效地删除它
+git push <remote> :refs/tags/<tagname>
+# 直观删除
+git push <remote> --delete <tagname>
+```
+
+### 检出标签
+
+如果你想查看某个标签所指向的文件版本，可以使用 git checkout 命令。
+
+## GIT别名
+
+```shell
+git config --global alias.co checkout
+git config --global alias.br branch
+git config --global alias.ci commit
+git config --global alias.st status
+git config --global alias.unstage 'reset HEAD --'
+```
+
