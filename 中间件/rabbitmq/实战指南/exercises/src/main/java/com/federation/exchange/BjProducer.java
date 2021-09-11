@@ -10,41 +10,31 @@ import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeoutException;
 
 /**
- * Producer:
+ * BjProducer:
  *
  * @author sunchen
  * @date 2021/9/11 11:32 下午
  */
-public class ProducerUpstream {
+public class BjProducer extends Producer {
     /**
      * 交换器名称
      */
-    static String exchangeName = "exchange:study:federationExchange";
-
-    /**
-     * 上游交换器
-     */
-    static String upstreamExchangeName = "exchange:study:upstream:federationExchange";
-
-    /**
-     * 上游队列
-     */
-    static String upstreamQueueName = "queue:study:upstream:federationExchange";
+    static String exchangeName = "exchange:study:federation:beijing:exchange";
 
     /**
      * 队列名称
      */
-    static String queueName = "queue:study:federationExchange";
+    static String queueName = "queue:study:federation:beijing:exchange";
 
     /**
-     * 绑定键
+     * 北京绑定键
      */
-    static String routeKey = "key:study:federationExchange";
+    static String BJRoutingKey = "key:study:federations:beijing:exchange";
 
     /**
      * 消息个数
      */
-    static int msgNum = 400;
+    static int msgNum = 20;
 
     public static void main(String[] args) throws IOException, TimeoutException {
         // 1. 创建连接
@@ -52,17 +42,15 @@ public class ProducerUpstream {
         // 2. 获取信道
         Channel channel = connection.createChannel();
         // 3. 定义交换器
-        channel.exchangeDeclare(upstreamExchangeName, BuiltinExchangeType.DIRECT.getType());
+        channel.exchangeDeclare(exchangeName, BuiltinExchangeType.DIRECT.getType());
         // 4. 定义队列
-        channel.queueDeclare(upstreamQueueName, true, false, false, null);
+        channel.queueDeclare(queueName, true, false, false, null);
         // 5. 绑定队列
-        channel.queueBind(upstreamQueueName, upstreamExchangeName, routeKey);
+        channel.queueBind(queueName, exchangeName, BJRoutingKey);
         // 6. 发消息
         for (int i = 0; i < msgNum; i++) {
-            byte[] msg = ("upstream-producer|federationExchange:" + i).getBytes(StandardCharsets.UTF_8);
-            byte[] upstreamMsg = ("upstream-producer|upstream-federationExchange:" + i).getBytes(StandardCharsets.UTF_8);
-            channel.basicPublish(upstreamExchangeName, routeKey, null, msg);
-            channel.basicPublish(exchangeName, routeKey, null, upstreamMsg);
+            byte[] msg = ("来自北京的消息：" + i).getBytes(StandardCharsets.UTF_8);
+            channel.basicPublish(exchangeName, getRoutingKey(), null, msg);
         }
         // 7. 关闭
         channel.close();

@@ -14,16 +14,16 @@ import java.security.NoSuchAlgorithmException;
 import java.util.concurrent.TimeoutException;
 
 /**
- * Producer:
+ * ShConsumer:
  *
  * @author sunchen
  * @date 2021/6/2 9:10 下午
  */
-public class Consumer {
+public class ShConsumer {
     /**
      * tag名称
      */
-    static String consumerTag = "consumer:study:federationExchange";
+    static String consumerTag = "consumer:study:federation:shanghai:exchange";
 
     /**
      * 消费者
@@ -38,7 +38,7 @@ public class Consumer {
     public static void main(String[] args) throws IOException, TimeoutException, NoSuchAlgorithmException, KeyManagementException, URISyntaxException {
         Connection connection = MqConnect.connection();
         Channel channel = connection.createChannel();
-        channel.basicConsume(SHProducer.queueName, false, consumerTag, new DefaultConsumer(channel) {
+        channel.basicConsume(ShProducer.queueName, false, consumerTag, new DefaultConsumer(channel) {
             @Override
             public void handleDelivery(String consumerTag, Envelope envelope, BasicProperties properties, byte[] body) throws IOException {
                 System.out.println(new String(body));

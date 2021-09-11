@@ -14,20 +14,16 @@ import java.security.NoSuchAlgorithmException;
 import java.util.concurrent.TimeoutException;
 
 /**
- * Producer:
+ * BjConsumer:
  *
  * @author sunchen
  * @date 2021/6/2 9:10 下午
  */
-public class ConsumerUpstream {
+public class BjConsumer {
     /**
      * tag名称
      */
-    static String consumerTag = "consumer:study:upstream:federationExchange";
-
-    static String upstreamInnerQueue = "federation: exchange:study:upstream:federationExchange -> rabbit@sunchendeMacBook-Pro:exchange:study:federationExchange";
-
-    static String innerQueue = "";
+    static String consumerTag = "consumer:study:upstream:federation:beijing:exchange";
 
     /**
      * 消费者
@@ -43,7 +39,7 @@ public class ConsumerUpstream {
         Connection connection = MqConnect.connection();
         Channel channel = connection.createChannel();
 
-        channel.basicConsume(BJProducer.queueName, false, consumerTag, new DefaultConsumer(channel) {
+        channel.basicConsume(BjProducer.queueName, false, consumerTag, new DefaultConsumer(channel) {
             @Override
             public void handleDelivery(String consumerTag, Envelope envelope, BasicProperties properties, byte[] body) throws IOException {
                 System.out.println(new String(body));

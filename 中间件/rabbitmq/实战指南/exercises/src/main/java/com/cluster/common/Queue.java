@@ -15,6 +15,6 @@ public class Queue {
     private String name ;
     private String vhost ;
     private Boolean durable ;
-    private Boolean auto_delete ;
+    private Boolean auto_delete;
     private Map<String , Object> arguments ;
 }

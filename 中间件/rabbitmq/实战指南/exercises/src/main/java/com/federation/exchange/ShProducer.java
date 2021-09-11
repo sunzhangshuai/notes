@@ -10,41 +10,31 @@ import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeoutException;
 
 /**
- * Producer:
+ * ShProducer:
  *
  * @author sunchen
  * @date 2021/9/11 11:32 下午
  */
-public class Producer {
+public class ShProducer extends Producer {
     /**
      * 交换器名称
      */
-    static String exchangeName = "exchange:study:federationExchange";
-
-    /**
-     * 上游交换器
-     */
-    static String upstreamExchangeName = "exchange:study:upstream:federationExchange";
-
-    /**
-     * 上游队列
-     */
-    static String upstreamQueueName = "queue:study:upstream:federationExchange";
+    static String exchangeName = "exchange:study:federation:shanghai:exchange";
 
     /**
      * 队列名称
      */
-    static String queueName = "queue:study:federationExchange";
+    static String queueName = "queue:study:federation:shanghai:exchange";
 
     /**
-     * 绑定键
+     * 北京绑定键
      */
-    static String routeKey = "key:study:federationExchange";
+    static String SHRoutingKey = "key:study:federations:shanghai:exchange";
 
     /**
      * 消息个数
      */
-    static int msgNum = 400;
+    static int msgNum = 10;
 
     public static void main(String[] args) throws IOException, TimeoutException {
         // 1. 创建连接
@@ -56,13 +46,11 @@ public class Producer {
         // 4. 定义队列
         channel.queueDeclare(queueName, true, false, false, null);
         // 5. 绑定队列
-        channel.queueBind(queueName, exchangeName, routeKey);
+        channel.queueBind(queueName, exchangeName, SHRoutingKey);
         // 6. 发消息
         for (int i = 0; i < msgNum; i++) {
-            byte[] msg = ("federationExchange:" + i).getBytes(StandardCharsets.UTF_8);
-            byte[] upstreamMsg = ("upstream-federationExchange:" + i).getBytes(StandardCharsets.UTF_8);
-            //channel.basicPublish(exchangeName, routeKey, null, msg);
-            channel.basicPublish(upstreamExchangeName, routeKey, null, upstreamMsg);
+            byte[] msg = ("来自上海的消息：" + i).getBytes(StandardCharsets.UTF_8);
+            channel.basicPublish(exchangeName, getRoutingKey(), null, msg);
         }
         // 7. 关闭
         channel.close();
