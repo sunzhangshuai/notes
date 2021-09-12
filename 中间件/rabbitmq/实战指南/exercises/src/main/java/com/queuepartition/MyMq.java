@@ -145,16 +145,11 @@ public class MyMq {
                 channel.basicConsume(queueNamePre + ":" + i, autoAck, consumerTagPre + ":" + i, new DefaultConsumer(channel) {
                     @Override
                     public void handleDelivery(String consumerTag, Envelope envelope, BasicProperties properties, byte[] body) throws IOException {
-                        try {
-                            System.out.println(new String(body));
-                            channel.basicAck(envelope.getDeliveryTag(), true);
-                        } catch (Exception e) {
-                            System.out.println("信道1：" + envelope.getDeliveryTag() + "拒绝");
-                        }
+                        System.out.println(new String(body));
+                        channel.basicAck(envelope.getDeliveryTag(), true);
                     }
                 });
             }
-
         }
 
         /**
