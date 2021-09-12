@@ -44,7 +44,7 @@ public class Producer{
     /**
      * 消息个数
      */
-    static int msgNum = 20;
+    static int msgNum = 5;
 
     public static void main(String[] args) throws IOException, TimeoutException {
         // 1. 创建连接
