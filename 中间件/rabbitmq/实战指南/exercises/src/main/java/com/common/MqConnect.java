@@ -23,6 +23,11 @@ public class MqConnect {
     public static String protocol = "amqp";
 
     /**
+     * IP
+     */
+    public static String ip = "127.0.0.1";
+
+    /**
      * 域名
      */
     public static String hostName = "localhost";
@@ -50,7 +55,7 @@ public class MqConnect {
     /**
      * 远程用户
      */
-    public static String originUsername = "zs";
+    public static String originUsername = "sunchen";
 
     /**
      * 远程密码

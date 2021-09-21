@@ -1,9 +1,7 @@
-package com.normal;
+package com.shovel;
 
 import com.common.MqConnect;
-import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.AMQP.BasicProperties;
-import com.rabbitmq.client.AMQP.Exchange.DeclareOk;
 import com.rabbitmq.client.BuiltinExchangeType;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
@@ -22,11 +20,30 @@ import java.util.concurrent.TimeoutException;
  * @date 2021/6/2 9:10 下午
  */
 public class Producer {
-    public static String exchangeName = "exchange:study:normal";
+    /**
+     * 交换器
+     */
+    static String exchangeName = "exchange:study:shovel";
 
-    public static String queueName = "queue:study:normal";
+    /**
+     * 源队列
+     */
+    static String sourceQueueName = "queue:study:source:shovel";
 
-    static String routingKey = "key.study.normal";
+    /**
+     * 目标队列
+     */
+    static String destQueueName = "queue:study:dest:shovel";
+
+    /**
+     * 绑定键
+     */
+    static String routingKey = "key.study.shovel";
+
+    /**
+     * 消息总个数
+     */
+    static int msgTotalCount = 5000000;
 
     public static void main(String[] args) throws IOException, TimeoutException, NoSuchAlgorithmException, KeyManagementException, URISyntaxException {
         Connection connection = MqConnect.connection();
@@ -36,13 +53,14 @@ public class Producer {
         channel.exchangeDeclare(exchangeName, BuiltinExchangeType.DIRECT, true, true, null);
 
         // 声明队列
-        channel.queueDeclare(queueName, true, false, true, null);
+        channel.queueDeclare(sourceQueueName, true, false, true, null);
+        channel.queueDeclare(destQueueName, true, false, true, null);
 
         // 交换器绑定队列
-        channel.queueBind(queueName, exchangeName, routingKey);
+        channel.queueBind(sourceQueueName, exchangeName, routingKey);
 
         // 发消息
-        for (int i = 0; i < 100000; i++) {
+        for (int i = 0; i < msgTotalCount; i++) {
             channel.basicPublish(exchangeName,
                     routingKey,
                     new BasicProperties()
@@ -51,5 +69,7 @@ public class Producer {
                             .build(),
                     "laopo,i love you".getBytes(StandardCharsets.UTF_8));
         }
+        channel.close();
+        connection.close();
     }
 }
